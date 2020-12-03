@@ -71,6 +71,17 @@ func (p *CameraProcessor) WriteQR(path string, data []byte) error {
 		outGif.Image = append(outGif.Image, palettedImage)
 		outGif.Delay = append(outGif.Delay, p.gifFramesDelay)
 	}
+
+	// empty frame at the end of the GIF for easy separation of a start and an end of animation
+	emptyFrame := image.NewPaletted(outGif.Image[0].Bounds(), palette)
+	for x := 0; x < emptyFrame.Rect.Dx(); x++ {
+		for y := 0; y < emptyFrame.Rect.Dy(); y++ {
+			emptyFrame.Set(x, y, color.White)
+		}
+	}
+	outGif.Image = append(outGif.Image, emptyFrame)
+	outGif.Delay = append(outGif.Delay, p.gifFramesDelay)
+
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %w", err)
